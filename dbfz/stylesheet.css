@@ -1,0 +1,9 @@
+.characterCell {
+  height: 300px;
+  width: 100px;
+}
+
+.characterCell img {
+  max-height: 100%;
+  max-width: 100%;
+}
