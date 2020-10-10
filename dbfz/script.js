@@ -33,6 +33,7 @@ var dbfz = (function () {
 		"majin_buu",
 		"nappa",
 		"piccolo",
+		"roshi",
 		"tien",
 		"trunks",
 		"vegeta",
