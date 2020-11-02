@@ -63,6 +63,7 @@ var dbfz = (function () {
         },
         "Ground Sticky Energy Blast": {
             state: "Ground",
+            once: true,
             whiffNext: true
         },
         "Ground Barrier Sphere": {
@@ -83,8 +84,7 @@ var dbfz = (function () {
             state: "Aerial"
         },
         "Aerial Consecutive Energy Blast": {
-            state: "Aerial",
-            allowWhiff: true
+            state: "Aerial"
         },
         "Aerial Explosive Energy Blast": {
             state: "Aerial"
@@ -97,7 +97,9 @@ var dbfz = (function () {
         },
         "Aerial Sticky Energy Blast": {
             state: "Aerial",
-            once: true
+            once: true,
+            canWhiffIfUsed: "Ground Consecutive Energy Blast",
+            canWhiffIfAvailable: "Aerial Consecutive Energy Blast"
         },
         "Aerial Barrier Sphere": {
             state: "Aerial",
@@ -217,7 +219,7 @@ var dbfz = (function () {
                 if (copiedSlots[currentSlot] == "Empty") comboLength = 5;
                 if (comboLength > 4) {
                     if (route != "") routes.push(route);
-                } else if ((!grabbed || moveChains[copiedSlots[currentSlot]].once != true) && conditionsMet(usedMoves, copiedSlots[currentSlot]) && ((!whiffNext || moveChains[copiedSlots[currentSlot]].allowWhiff == true))) {
+                } else if (conditionsMet(currentSlot, copiedSlots, usedMoves, whiffNext) && (whiffNext || !grabbed || copiedSlots[currentSlot].once == undefined)) {
                     if (comboLength != 0) route += " -> ";
                     route += copiedSlots[currentSlot];
                     usedMoves.push(copiedSlots[currentSlot]);
@@ -239,10 +241,13 @@ var dbfz = (function () {
     }
 
 
-    function conditionsMet(usedMoves, move) {
+    function conditionsMet(currentSlot, copiedSlots, usedMoves, whiffNext) {
+        if (moveChains[copiedSlots[currentSlot]].canWhiffIfAvailable != undefined && moveChains[copiedSlots[currentSlot]].canWhiffIfUsed != undefined && whiffNext) {
+            return copiedSlots.includes(moveChains[copiedSlots[currentSlot]].canWhiffIfAvailable) && usedMoves.includes(moveChains[copiedSlots[currentSlot]].canWhiffIfUsed);
+        }
         let found = false;
-        if (moveChains[move].conditions == undefined) return true;
-        moveChains[move].conditions.forEach(required => {
+        if (moveChains[copiedSlots[currentSlot]].conditions == undefined) return true;
+        moveChains[copiedSlots[currentSlot]].conditions.forEach(required => {
             if (usedMoves.includes(required)) found = true; //return here is the return value for the forEach and not the function...
         });
         return found;
