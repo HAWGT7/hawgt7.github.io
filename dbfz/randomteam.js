@@ -1,5 +1,6 @@
+'use strict';
+
 var dbfz = (function () {
-    'use strict';
 	
 	var characters = [
 		"android_16",
@@ -95,7 +96,7 @@ var dbfz = (function () {
 	
     return {
         init: init,
-		generateRandomTeam: generateRandomTeam,
+		generateRandomTeam: generateRandomTeam
     };
 
 })();
