@@ -118,6 +118,10 @@ var dbfz = (function () {
                 "Aerial Consecutive Energy Blast",
                 "Aerial Explosive Energy Blast",
                 "Aerial Homing Energy Blast"
+            ],
+            canComboAfterIfUsed : [
+                "Ground Homing Energy Blast",
+                "Aerial Explosive Energy Blast"
             ]
         }
     };
@@ -229,6 +233,7 @@ var dbfz = (function () {
                     lastMoveSlot = currentSlot;
                     currentSlot = moveChains[copiedSlots[currentSlot]].next;
                     copiedSlots[lastMoveSlot] = "Empty";
+                    if (!canComboAfter(currentSlot, copiedSlots, usedMoves)) currentSlot = lastMoveSlot;
                 } else {
                     if (route != "") routes.push(route);
                     comboLength = 5;
@@ -252,6 +257,15 @@ var dbfz = (function () {
         let found = false;
         if (moveChains[copiedSlots[currentSlot]].conditions == undefined) return true;
         moveChains[copiedSlots[currentSlot]].conditions.forEach(required => {
+            if (usedMoves.includes(required)) found = true; //return here is the return value for the forEach and not the function...
+        });
+        return found;
+    }
+
+    function canComboAfter(currentSlot, copiedSlots, usedMoves) {
+        let found = false;
+        if (moveChains[copiedSlots[currentSlot]].canComboAfterIfUsed == undefined) return true;
+        moveChains[copiedSlots[currentSlot]].canComboAfterIfUsed.forEach(required => {
             if (usedMoves.includes(required)) found = true; //return here is the return value for the forEach and not the function...
         });
         return found;
