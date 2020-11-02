@@ -114,9 +114,10 @@ var dbfz = (function () {
         "Aerial Sonic Warp": {
             next: 0,
             conditions: [
-                "Ground Kamehameha",
-                "Ground Homing Energy Blast",
-                "Aerial Explosive Energy Blast"
+                "Aerial Kamehameha",
+                "Aerial Consecutive Energy Blast",
+                "Aerial Explosive Energy Blast",
+                "Aerial Homing Energy Blast"
             ]
         }
     };
