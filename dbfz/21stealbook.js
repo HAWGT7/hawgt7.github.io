@@ -152,7 +152,6 @@ var dbfz = (function () {
         }
 
         allRoutes = chooseMostOptimal(allRoutes);
-        console.log(allRoutes);
 
         displayAllRoutes();
 
