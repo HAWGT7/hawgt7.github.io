@@ -258,7 +258,7 @@ var dbfz = (function () {
 
     function lookUp() {
         let slots = ["Empty", "Empty", "Empty", "Empty"];
-        let countStr;
+        let countStr = "";
         for (let a = 1; a < 5; a++) {
             let stateTxt = a % 2 == 1 ? "Ground " : "Aerial ";
             if (document.getElementById("slot" + a).value != "Empty")
@@ -281,7 +281,7 @@ var dbfz = (function () {
     }
 
     function displayAllRoutes() {
-        let countStr;
+        let countStr = "";
         if (allRoutes.length > 0) countStr = "(" + allRoutes.length + ")";
         let el = document.getElementById("allRoutes");
         let html = "<table class='table'>";
