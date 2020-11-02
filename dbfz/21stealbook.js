@@ -47,62 +47,65 @@ var dbfz = (function () {
     var moveChains = {
         "Empty": {},
         "Ground Kamehameha": {
-            state: "Ground"
+            next: 2
         },
         "Ground Consecutive Energy Blast": {
-            state: "Aerial"
+            next: 3
         },
         "Ground Explosive Energy Blast": {
-            state: "Aerial"
+            next: 3
         },
         "Ground Homing Energy Blast": {
-            state: "Ground"
+            next: 2
         },
         "Ground Solar Flare": {
-            state: "Aerial"
+            next: 1
         },
         "Ground Sticky Energy Blast": {
-            state: "Ground",
+            next: 0,
             once: true,
             whiffNext: true
         },
         "Ground Barrier Sphere": {
-            state: "Ground",
+            next: 0,
             conditions: [
                 "Ground Consecutive Energy Blast",
                 "Ground Explosive Energy Blast"
             ]
         },
         "Ground Sonic Warp": {
-            state: "Aerial",
+            next: 1,
             conditions: [
                 "Ground Kamehameha",
                 "Ground Homing Energy Blast"
             ]
         },
         "Aerial Kamehameha": {
-            state: "Aerial"
+            next: 3
         },
         "Aerial Consecutive Energy Blast": {
-            state: "Aerial"
+            next: 3
         },
         "Aerial Explosive Energy Blast": {
-            state: "Aerial"
+            next: 3
         },
         "Aerial Homing Energy Blast": {
-            state: "Aerial"
+            next: 3
         },
         "Aerial Solar Flare": {
-            state: "Aerial"
+            next: 1
         },
         "Aerial Sticky Energy Blast": {
-            state: "Aerial",
+            next: 1,
             once: true,
-            canWhiffIfUsed: "Ground Consecutive Energy Blast",
-            canWhiffIfAvailable: "Aerial Consecutive Energy Blast"
+            canWhiffIfUsed: ["Ground Consecutive Energy Blast"],
+            canWhiffIfAvailable: [
+                "Aerial Consecutive Energy Blast",
+                "Empty"
+            ] //OR EMPTY
         },
         "Aerial Barrier Sphere": {
-            state: "Aerial",
+            next: 1,
             conditions: [
                 "Ground Consecutive Energy Blast",
                 "Ground Explosive Energy Blast",
@@ -113,7 +116,7 @@ var dbfz = (function () {
             ]
         },
         "Aerial Sonic Warp": {
-            state: "Ground",
+            next: 0,
             conditions: [
                 "Ground Kamehameha",
                 "Ground Homing Energy Blast",
@@ -227,7 +230,7 @@ var dbfz = (function () {
                     if (moveChains[copiedSlots[currentSlot]].once == true) grabbed = true;
                     if (moveChains[copiedSlots[currentSlot]].whiffNext == true) whiffNext = true;
                     lastMoveSlot = currentSlot;
-                    currentSlot = getNextSlot(currentSlot, moveChains[copiedSlots[currentSlot]].state);
+                    currentSlot = moveChains[copiedSlots[currentSlot]].next;
                     copiedSlots[lastMoveSlot] = "Empty";
                 } else {
                     if (route != "") routes.push(route);
@@ -243,7 +246,15 @@ var dbfz = (function () {
 
     function conditionsMet(currentSlot, copiedSlots, usedMoves, whiffNext) {
         if (moveChains[copiedSlots[currentSlot]].canWhiffIfAvailable != undefined && moveChains[copiedSlots[currentSlot]].canWhiffIfUsed != undefined && whiffNext) {
-            return copiedSlots.includes(moveChains[copiedSlots[currentSlot]].canWhiffIfAvailable) && usedMoves.includes(moveChains[copiedSlots[currentSlot]].canWhiffIfUsed);
+            let foundBefore = false;
+            let foundAfter = false;
+            moveChains[copiedSlots[currentSlot]].canWhiffIfUsed.forEach(required => {
+                if (usedMoves[moveChains[copiedSlots[currentSlot]].next] == required) foundBefore = true; //return here is the return value for the forEach and not the function...
+            });
+            moveChains[copiedSlots[currentSlot]].canWhiffIfAvailable.forEach(required => {
+                if (copiedSlots.includes(required)) foundAfter = true; //return here is the return value for the forEach and not the function...
+            });
+            return foundBefore && foundAfter;
         }
         let found = false;
         if (moveChains[copiedSlots[currentSlot]].conditions == undefined) return true;
@@ -253,16 +264,9 @@ var dbfz = (function () {
         return found;
     }
 
-    function getNextSlot(currentSlot, state) {
-        if ((currentSlot == 0 || currentSlot == 1) && state == "Ground") return 2;
-        if ((currentSlot == 2 || currentSlot == 3) && state == "Ground") return 0;
-        if ((currentSlot == 0 || currentSlot == 1) && state == "Aerial") return 3;
-        if ((currentSlot == 2 || currentSlot == 3) && state == "Aerial") return 1;
-    }
-
     function lookUp() {
         let slots = ["Empty", "Empty", "Empty", "Empty"];
-
+        let countStr;
         for (let a = 1; a < 5; a++) {
             let stateTxt = a % 2 == 1 ? "Ground " : "Aerial ";
             if (document.getElementById("slot" + a).value != "Empty")
@@ -272,9 +276,10 @@ var dbfz = (function () {
 
         let el = document.getElementById("possibleRoutes");
         let possibleRoutes = chooseMostOptimal(findRoutes(slots));
+        if (possibleRoutes.length > 0) countStr = "(" + possibleRoutes.length + ")";
         let html = "<table class='table'>";
         html += "<tr>";
-        html += "<th>Possible Routes</th>";
+        html += "<th>Possible Routes" + countStr + "</th>";
         html += "</tr>";
         possibleRoutes.forEach(r => {
             html += routeToHTML(r, false);
@@ -287,7 +292,7 @@ var dbfz = (function () {
         let el = document.getElementById("allRoutes");
         let html = "<table class='table'>";
         html += "<tr>";
-        html += "<th>All Routes</th>";
+        html += "<th>All Routes (" + allRoutes.length + ")</th>";
         html += "</tr>";
         allRoutes.forEach(r => {
             html += routeToHTML(r, true);
