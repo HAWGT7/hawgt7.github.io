@@ -98,11 +98,7 @@ var dbfz = (function () {
         "Aerial Sticky Energy Blast": {
             next: 1,
             once: true,
-            canWhiffIfUsed: ["Ground Consecutive Energy Blast"],
-            canWhiffIfAvailable: [
-                "Aerial Consecutive Energy Blast",
-                "Empty"
-            ] //OR EMPTY
+            canWhiffIfUsed: ["Ground Consecutive Energy Blast"]
         },
         "Aerial Barrier Sphere": {
             next: 1,
@@ -245,16 +241,12 @@ var dbfz = (function () {
 
 
     function conditionsMet(currentSlot, copiedSlots, usedMoves, whiffNext) {
-        if (moveChains[copiedSlots[currentSlot]].canWhiffIfAvailable != undefined && moveChains[copiedSlots[currentSlot]].canWhiffIfUsed != undefined && whiffNext) {
-            let foundBefore = false;
-            let foundAfter = false;
+        if (moveChains[copiedSlots[currentSlot]].canWhiffIfUsed != undefined && whiffNext) {
+            let found = false;
             moveChains[copiedSlots[currentSlot]].canWhiffIfUsed.forEach(required => {
-                if (usedMoves[moveChains[copiedSlots[currentSlot]].next] == required) foundBefore = true; //return here is the return value for the forEach and not the function...
+                if (usedMoves.includes(required)) found = true; //return here is the return value for the forEach and not the function...
             });
-            moveChains[copiedSlots[currentSlot]].canWhiffIfAvailable.forEach(required => {
-                if (copiedSlots.includes(required)) foundAfter = true; //return here is the return value for the forEach and not the function...
-            });
-            return foundBefore && foundAfter;
+            return found;
         }
         let found = false;
         if (moveChains[copiedSlots[currentSlot]].conditions == undefined) return true;
@@ -289,10 +281,12 @@ var dbfz = (function () {
     }
 
     function displayAllRoutes() {
+        let countStr;
+        if (allRoutes.length > 0) countStr = "(" + allRoutes.length + ")";
         let el = document.getElementById("allRoutes");
         let html = "<table class='table'>";
         html += "<tr>";
-        html += "<th>All Routes (" + allRoutes.length + ")</th>";
+        html += "<th>All Routes" + countStr + "</th>";
         html += "</tr>";
         allRoutes.forEach(r => {
             html += routeToHTML(r, true);
