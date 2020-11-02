@@ -10,27 +10,29 @@
   <link rel="stylesheet" href="./stylesheet.css">
 
 
-  <title>DBFZ 21 SPELL BOOK</title>
+  <title>DBFZ 21 STEAL BOOK</title>
 
 </head>
 
 <body>
   <div class="jumbotron text-center">
-    <h1>DBFZ 21 SPELL BOOK</h1>
+    <h1>DBFZ 21 STEAL BOOK</h1>
   </div>
   <div class="container text-center center">
     <div id="steals">
     </div>
-    <div id="routes">
+    <div id="possibleRoutes" class="routeTable">
+    </div>
+    <center>
+			<button type="button" class="btn btn-primary" onclick="dbfz.toggleAllRoutes()">Show/Hide All Routes</button>
+		</center>
+    <div id="allRoutes" class="routeTable">
     </div>
   </div>
-  <footer class="container-fluid bg-4 text-center">
-    <p>By <a href="https://steamcommunity.com/profiles/76561198017577802">HAWGT</a></p>
-  </footer>
   <script src="./thirdparty/jquery-3.5.1.slim.min.js"></script>
   <script src="./thirdparty/popper.min.js"></script>
   <script src="./thirdparty/bootstrap.min.js"></script>
-  <script src="21spellbook.js"></script>
+  <script src="21stealbook.js"></script>
 </body>
 
 </html>

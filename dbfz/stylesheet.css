@@ -7,3 +7,18 @@
   max-height: 100%;
   max-width: 100%;
 }
+
+.stealRouteIcon {
+  height: 48px;
+  width: 48px;
+}
+
+.stealAllRouteIcon {
+  height: 24px;
+  width: 24px;
+}
+
+.routeTable {
+  margin-top: 32px;
+  margin-bottom: 32px;
+}

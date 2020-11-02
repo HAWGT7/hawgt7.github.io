@@ -119,8 +119,6 @@ var dbfz = (function () {
         }
     };
 
-
-
     var allRoutes = new Set();
 
     //Fill All Slots all permutations, find multiple routes for each permutation
@@ -152,7 +150,9 @@ var dbfz = (function () {
             }
         }
 
-        console.log(allRoutes);
+        allRoutes = chooseMostOptimal(allRoutes);
+
+        displayAllRoutes();
 
         let el = document.getElementById("steals");
         let html = "<table class='table'>";
@@ -187,12 +187,7 @@ var dbfz = (function () {
         el.innerHTML = html;
 
         lookUp();
-
-        findRoutes(["Ground Explosive Energy Blast", "Aerial Explosive Energy Blast", "Ground Barrier Sphere", "Aerial Barrier Sphere"]);
     }
-
-    //FIX AIR TP
-    //FIX GREEN
 
     function findRoutes(slots) {
 
@@ -231,6 +226,9 @@ var dbfz = (function () {
                     lastMoveSlot = currentSlot;
                     currentSlot = getNextSlot(currentSlot, moveChains[copiedSlots[currentSlot]].state);
                     copiedSlots[lastMoveSlot] = "Empty";
+                } else {
+                    if (route != "") routes.push(route);
+                    comboLength = 5;
                 }
                 comboLength++;
             }
@@ -266,21 +264,44 @@ var dbfz = (function () {
             document.getElementById("slot" + a + "Icon").innerHTML = "<img src='./images/steals/" + document.getElementById("slot" + a).value.replace(/\s/g, '').replace("Ground", "").replace("Aerial", "") + ".png'>";
         }
 
-        let el = document.getElementById("routes");
-        let possibleRoutes = findRoutes(slots);
-        let orderedRoutes = chooseMostOptimal(possibleRoutes);
+        let el = document.getElementById("possibleRoutes");
+        let possibleRoutes = chooseMostOptimal(findRoutes(slots));
         let html = "<table class='table'>";
         html += "<tr>";
-        html += "<th>Routes</th>";
+        html += "<th>Possible Routes</th>";
         html += "</tr>";
-        orderedRoutes.forEach(r => {
-            html += routeToHTML(r);
+        possibleRoutes.forEach(r => {
+            html += routeToHTML(r, false);
         });
         html += "</table>"
         el.innerHTML = html;
     }
 
-    function routeToHTML(moves) {
+    function displayAllRoutes() {
+        let el = document.getElementById("allRoutes");
+        let html = "<table class='table'>";
+        html += "<tr>";
+        html += "<th>All Routes</th>";
+        html += "</tr>";
+        allRoutes.forEach(r => {
+            html += routeToHTML(r, true);
+        });
+        html += "</table>"
+        el.innerHTML = html;
+        el.style.display = "none";
+    }
+
+    function toggleAllRoutes() {
+        var el = document.getElementById("allRoutes");
+        if (el.style.display === "none") {
+            el.style.display = "block";
+        } else {
+            el.style.display = "none";
+        }
+    }
+
+    function routeToHTML(moves, small) {
+        let cssClass = !small ? "stealRouteIcon" : "stealAllRouteIcon";
         let movesArray = moves.split(" -> ");
         let movesHTML = "<tr><td>";
         let whiffStr;
@@ -290,7 +311,7 @@ var dbfz = (function () {
             } else {
                 whiffStr = " ";
             }
-            movesHTML += m.substring(0, 6) + whiffStr + " <img src='./images/steals/" + m.replace(/\s/g, "").replace("Ground", "").replace("Aerial", "").replace("(Whiff)", "") + ".png'>";
+            movesHTML += m.substring(0, 6) + whiffStr + " <img class='" + cssClass + "' src='./images/steals/" + m.replace(/\s/g, "").replace("Ground", "").replace("Aerial", "").replace("(Whiff)", "") + ".png'>";
 
         });
         movesHTML += " Aproximate Damage: " + getDamage(moves) + "</td></tr>";
@@ -303,7 +324,6 @@ var dbfz = (function () {
         orderedRoutes.sort(function (a, b) {
             return getDamage(b) - getDamage(a);
         });
-
         return orderedRoutes;
     }
 
@@ -313,11 +333,12 @@ var dbfz = (function () {
         let proration = 1;
         let currentMove;
         let firstMove = true;
+        let whiffed;
         moves.forEach(m => {
             currentMove = m.replace(/Ground\s/g, "").replace(/Aerial\s/g, "");
             if (moveDamageProration[currentMove] != undefined) {
-                damage += proration * moveDamageProration[currentMove].damage;
-                if ((firstMove && moveDamageProration[currentMove].mustStart == true) || moveDamageProration[currentMove].mustStart == undefined) proration -= moveDamageProration[currentMove].proration;
+                if (!whiffed) damage += proration * moveDamageProration[currentMove].damage;
+                if ((firstMove && moveDamageProration[currentMove].mustStart == true) || moveDamageProration[currentMove].mustStart == undefined || !whiffed) proration -= moveDamageProration[currentMove].proration;
                 firstMove = false;
             }
         });
@@ -326,7 +347,8 @@ var dbfz = (function () {
 
     return {
         init: init,
-        lookUp: lookUp
+        lookUp: lookUp,
+        toggleAllRoutes: toggleAllRoutes
     };
 
 })();
