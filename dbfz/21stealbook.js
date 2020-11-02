@@ -83,7 +83,8 @@ var dbfz = (function () {
             state: "Aerial"
         },
         "Aerial Consecutive Energy Blast": {
-            state: "Aerial"
+            state: "Aerial",
+            allowWhiff: true
         },
         "Aerial Explosive Energy Blast": {
             state: "Aerial"
@@ -151,6 +152,7 @@ var dbfz = (function () {
         }
 
         allRoutes = chooseMostOptimal(allRoutes);
+        console.log(allRoutes);
 
         displayAllRoutes();
 
@@ -216,7 +218,7 @@ var dbfz = (function () {
                 if (copiedSlots[currentSlot] == "Empty") comboLength = 5;
                 if (comboLength > 4) {
                     if (route != "") routes.push(route);
-                } else if ((!grabbed || moveChains[copiedSlots[currentSlot]].once != true) && conditionsMet(usedMoves, copiedSlots[currentSlot])) {
+                } else if ((!grabbed || moveChains[copiedSlots[currentSlot]].once != true) && conditionsMet(usedMoves, copiedSlots[currentSlot]) && ((!whiffNext || moveChains[copiedSlots[currentSlot]].allowWhiff == true))) {
                     if (comboLength != 0) route += " -> ";
                     route += copiedSlots[currentSlot];
                     usedMoves.push(copiedSlots[currentSlot]);
