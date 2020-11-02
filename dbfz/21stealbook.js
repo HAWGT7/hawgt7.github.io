@@ -334,12 +334,11 @@ var dbfz = (function () {
         let proration = 1;
         let currentMove;
         let firstMove = true;
-        let whiffed;
         moves.forEach(m => {
             currentMove = m.replace(/Ground\s/g, "").replace(/Aerial\s/g, "");
             if (moveDamageProration[currentMove] != undefined) {
-                if (!whiffed) damage += proration * moveDamageProration[currentMove].damage;
-                if ((firstMove && moveDamageProration[currentMove].mustStart == true) || moveDamageProration[currentMove].mustStart == undefined || !whiffed) proration -= moveDamageProration[currentMove].proration;
+                damage += proration * moveDamageProration[currentMove].damage;
+                if ((firstMove && moveDamageProration[currentMove].mustStart == true) || moveDamageProration[currentMove].mustStart == undefined) proration -= moveDamageProration[currentMove].proration;
                 proration = Math.max(proration, 0.1);
                 firstMove = false;
             }
