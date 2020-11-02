@@ -63,19 +63,19 @@ var dbfz = (function () {
         },
         "Ground Sticky Energy Blast": {
             next: 0,
-            once: true,
+            grab: true,
             whiffNext: true
         },
         "Ground Barrier Sphere": {
             next: 0,
-            conditions: [
-                "Ground Consecutive Energy Blast",
-                "Ground Explosive Energy Blast"
+            canComboIfUsed: [
+                "Ground Kamehameha",
+                "Ground Homing Energy Blast"
             ]
         },
         "Ground Sonic Warp": {
             next: 1,
-            conditions: [
+            canComboIfUsed: [
                 "Ground Kamehameha",
                 "Ground Homing Energy Blast"
             ]
@@ -97,29 +97,39 @@ var dbfz = (function () {
         },
         "Aerial Sticky Energy Blast": {
             next: 1,
-            once: true,
+            grab: true,
             canWhiffIfUsed: ["Ground Consecutive Energy Blast"]
         },
         "Aerial Barrier Sphere": {
             next: 1,
-            conditions: [
+            canComboIfUsed: [
                 "Ground Consecutive Energy Blast",
                 "Ground Explosive Energy Blast",
                 "Aerial Kamehameha",
                 "Aerial Consecutive Energy Blast",
                 "Aerial Explosive Energy Blast",
                 "Aerial Homing Energy Blast"
+            ],
+            canComboAfterIfAvailable: [
+                "Aerial Consecutive Energy Blast",
+                "Aerial Explosive Energy Blast"
             ]
         },
+        //Missing AIR BALL INTO AIR TP
         "Aerial Sonic Warp": {
             next: 0,
-            conditions: [
+            canComboIfUsed: [
+                "Ground Consecutive Energy Blast",
+                "Ground Explosive Energy Blast",
                 "Aerial Kamehameha",
                 "Aerial Consecutive Energy Blast",
                 "Aerial Explosive Energy Blast",
                 "Aerial Homing Energy Blast"
             ],
-            canComboAfterIfUsed : [
+            canComboAfterIfUsed: [
+                "Ground Kamehameha",
+                "Ground Consecutive Energy Blast",
+                "Ground Explosive Energy Blast",
                 "Ground Homing Energy Blast",
                 "Aerial Explosive Energy Blast"
             ]
@@ -208,6 +218,7 @@ var dbfz = (function () {
         let whiffNext;
         let usedMoves = [];
         let emptyArr = [];
+        let lastMove;
 
         for (let a = 0; a < 4; a++) {
             route = "";
@@ -216,6 +227,7 @@ var dbfz = (function () {
             lastMoveSlot = a;
             grabbed = false;
             whiffNext = false;
+            lastMove = false;
             //Arrays in JS are references
             usedMoves = Array.from(emptyArr);
             copiedSlots = Array.from(slots);
@@ -223,17 +235,18 @@ var dbfz = (function () {
                 if (copiedSlots[currentSlot] == "Empty") comboLength = 5;
                 if (comboLength > 4) {
                     if (route != "") routes.push(route);
-                } else if (conditionsMet(currentSlot, copiedSlots, usedMoves, whiffNext) && (whiffNext || !grabbed || copiedSlots[currentSlot].once == undefined)) {
+                } else if (canComboIfUsedMet(currentSlot, copiedSlots, usedMoves, whiffNext) && (whiffNext || !grabbed || copiedSlots[currentSlot].grab == undefined)) {
                     if (comboLength != 0) route += " -> ";
                     route += copiedSlots[currentSlot];
                     usedMoves.push(copiedSlots[currentSlot]);
-                    if (whiffNext == true && moveChains[copiedSlots[currentSlot]].once == true) route += " (Whiff) ";
-                    if (moveChains[copiedSlots[currentSlot]].once == true) grabbed = true;
+                    if (whiffNext == true && moveChains[copiedSlots[currentSlot]].grab == true) route += " (Whiff) ";
+                    if (moveChains[copiedSlots[currentSlot]].grab == true) grabbed = true;
                     if (moveChains[copiedSlots[currentSlot]].whiffNext == true) whiffNext = true;
                     lastMoveSlot = currentSlot;
                     currentSlot = moveChains[copiedSlots[currentSlot]].next;
                     copiedSlots[lastMoveSlot] = "Empty";
-                    if (!canComboAfter(currentSlot, copiedSlots, usedMoves)) currentSlot = lastMoveSlot;
+                    if (lastMove == true) currentSlot = lastMoveSlot;
+                    if (!canComboAfter(currentSlot, copiedSlots, usedMoves)) lastMove = true;
                 } else {
                     if (route != "") routes.push(route);
                     comboLength = 5;
@@ -246,29 +259,44 @@ var dbfz = (function () {
     }
 
 
-    function conditionsMet(currentSlot, copiedSlots, usedMoves, whiffNext) {
+    function canComboIfUsedMet(currentSlot, copiedSlots, usedMoves, whiffNext) {
+        let found1 = false;
+        let found2 = false;
         if (moveChains[copiedSlots[currentSlot]].canWhiffIfUsed != undefined && whiffNext) {
-            let found = false;
             moveChains[copiedSlots[currentSlot]].canWhiffIfUsed.forEach(required => {
-                if (usedMoves.includes(required)) found = true; //return here is the return value for the forEach and not the function...
+                if (usedMoves.includes(required)) found1 = true; //return here is the return value for the forEach and not the function...
             });
-            return found;
+        } else {
+            found1 = true;
         }
-        let found = false;
-        if (moveChains[copiedSlots[currentSlot]].conditions == undefined) return true;
-        moveChains[copiedSlots[currentSlot]].conditions.forEach(required => {
-            if (usedMoves.includes(required)) found = true; //return here is the return value for the forEach and not the function...
-        });
-        return found;
+        if (moveChains[copiedSlots[currentSlot]].canComboIfUsed != undefined) {
+            moveChains[copiedSlots[currentSlot]].canComboIfUsed.forEach(required => {
+                if (usedMoves.includes(required)) found2 = true; //return here is the return value for the forEach and not the function...
+            });
+        } else {
+            found2 = true;
+        }
+        return found1 && found2;
     }
 
     function canComboAfter(currentSlot, copiedSlots, usedMoves) {
-        let found = false;
-        if (moveChains[copiedSlots[currentSlot]].canComboAfterIfUsed == undefined) return true;
-        moveChains[copiedSlots[currentSlot]].canComboAfterIfUsed.forEach(required => {
-            if (usedMoves.includes(required)) found = true; //return here is the return value for the forEach and not the function...
-        });
-        return found;
+        let found1 = false;
+        let found2 = false;
+        if (moveChains[copiedSlots[currentSlot]].canComboAfterIfUsed != undefined) {
+            moveChains[copiedSlots[currentSlot]].canComboAfterIfUsed.forEach(required => {
+                if (usedMoves.includes(required)) found1 = true; //return here is the return value for the forEach and not the function...
+            });
+        } else {
+            found1 = true;
+        }
+        if (moveChains[copiedSlots[currentSlot]].canComboAfterIfAvailable != undefined) {
+            moveChains[copiedSlots[currentSlot]].canComboAfterIfAvailable.forEach(required => {
+                if (copiedSlots.includes(required)) found2 = true; //return here is the return value for the forEach and not the function...
+            });
+        } else {
+            found2 = true;
+        }
+        return found1 && found2;
     }
 
     function lookUp() {
