@@ -78,7 +78,8 @@ var dbfz = (function () {
             canComboIfUsed: [
                 "Ground Kamehameha",
                 "Ground Homing Energy Blast"
-            ]
+            ],
+            teleport: true
         },
         "Aerial Kamehameha": {
             next: 3
@@ -87,7 +88,8 @@ var dbfz = (function () {
             next: 3
         },
         "Aerial Explosive Energy Blast": {
-            next: 3
+            next: 3,
+            forceCloseToGround: true
         },
         "Aerial Homing Energy Blast": {
             next: 3
@@ -131,8 +133,13 @@ var dbfz = (function () {
                 "Ground Consecutive Energy Blast",
                 "Ground Explosive Energy Blast",
                 "Ground Homing Energy Blast",
-                "Aerial Explosive Energy Blast"
-            ]
+                "Aerial Kamehameha",
+                "Aerial Consecutive Energy Blast",
+                "Aerial Explosive Energy Blast",
+                "Aerial Homing Energy Blast"
+            ],
+            requiresCloseToGround: true,
+            teleport: true
         }
     };
 
@@ -219,6 +226,8 @@ var dbfz = (function () {
         let usedMoves = [];
         let emptyArr = [];
         let lastMove;
+        let closeToGround;
+        let requiresCloseToGround;
 
         for (let a = 0; a < 4; a++) {
             route = "";
@@ -228,6 +237,8 @@ var dbfz = (function () {
             grabbed = false;
             whiffNext = false;
             lastMove = false;
+            closeToGround = false;
+            requiresCloseToGround = false;
             //Arrays in JS are references
             usedMoves = Array.from(emptyArr);
             copiedSlots = Array.from(slots);
@@ -239,6 +250,12 @@ var dbfz = (function () {
                     if (comboLength != 0) route += " -> ";
                     route += copiedSlots[currentSlot];
                     usedMoves.push(copiedSlots[currentSlot]);
+                    if (moveChains[copiedSlots[currentSlot]].forceCloseToGround == true) closeToGround = true;
+                    if (moveChains[copiedSlots[currentSlot]].requiresCloseToGround == true) requiresCloseToGround = true;
+                    if (requiresCloseToGround && !closeToGround && moveChains[copiedSlots[currentSlot]].teleport != true) {
+                        requiresCloseToGround = false;
+                        route += " (Dragged) ";
+                    }
                     if (whiffNext == true && moveChains[copiedSlots[currentSlot]].grab == true) route += " (Whiff) ";
                     if (moveChains[copiedSlots[currentSlot]].grab == true) grabbed = true;
                     if (moveChains[copiedSlots[currentSlot]].whiffNext == true) whiffNext = true;
@@ -352,14 +369,20 @@ var dbfz = (function () {
         let cssClass = !small ? "stealRouteIcon" : "stealAllRouteIcon";
         let movesArray = moves.split(" -> ");
         let movesHTML = "<tr><td>";
-        let whiffStr;
+        let whiffStr = "";
+        let closeToGroundStr = "";
         movesArray.forEach(m => {
             if (m.includes("(Whiff)")) {
                 whiffStr = " (Whiff) ";
             } else {
                 whiffStr = " ";
             }
-            movesHTML += m.substring(0, 6) + whiffStr + " <img class='" + cssClass + "' src='./images/steals/" + m.replace(/\s/g, "").replace("Ground", "").replace("Aerial", "").replace("(Whiff)", "") + ".png'>";
+            if (m.includes("(Dragged)")) {
+                closeToGroundStr = " (Dragged) ";
+            } else {
+                closeToGroundStr = " ";
+            }
+            movesHTML += m.substring(0, 6) + whiffStr + closeToGroundStr + " <img class='" + cssClass + "' src='./images/steals/" + m.replace("(Dragged)", "").replace("Ground", "").replace("Aerial", "").replace("(Whiff)", "").replace(/\s/g, "") + ".png'>";
 
         });
         movesHTML += " Aproximate Damage: " + getDamage(moves) + "</td></tr>";
@@ -382,7 +405,7 @@ var dbfz = (function () {
         let currentMove;
         let firstMove = true;
         moves.forEach(m => {
-            currentMove = m.replace(/Ground\s/g, "").replace(/Aerial\s/g, "");
+            currentMove = m.replace(/ *\([^)]*\) */g, "").replace(/Dragged\s/g, "").replace(/Ground\s/g, "").replace(/Aerial\s/g, "");
             if (moveDamageProration[currentMove] != undefined) {
                 damage += proration * moveDamageProration[currentMove].damage;
                 if ((firstMove && moveDamageProration[currentMove].mustStart == true) || moveDamageProration[currentMove].mustStart == undefined) proration -= moveDamageProration[currentMove].proration;
