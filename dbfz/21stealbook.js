@@ -117,7 +117,6 @@ var dbfz = (function () {
                 "Aerial Explosive Energy Blast"
             ]
         },
-        //Missing AIR BALL INTO AIR TP
         "Aerial Sonic Warp": {
             next: 0,
             canComboIfUsed: [
@@ -254,7 +253,7 @@ var dbfz = (function () {
                     if (moveChains[copiedSlots[currentSlot]].requiresCloseToGround == true) requiresCloseToGround = true;
                     if (requiresCloseToGround && !closeToGround && moveChains[copiedSlots[currentSlot]].teleport != true) {
                         requiresCloseToGround = false;
-                        route += " (Dragged) ";
+                        route += " (Enemy is close to the ground) ";
                     }
                     if (whiffNext == true && moveChains[copiedSlots[currentSlot]].grab == true) route += " (Whiff) ";
                     if (moveChains[copiedSlots[currentSlot]].grab == true) grabbed = true;
@@ -377,12 +376,12 @@ var dbfz = (function () {
             } else {
                 whiffStr = " ";
             }
-            if (m.includes("(Dragged)")) {
-                closeToGroundStr = " (Dragged) ";
+            if (m.includes("(Enemy is close to the ground)")) {
+                closeToGroundStr = " (Enemy is close to the ground) ";
             } else {
                 closeToGroundStr = " ";
             }
-            movesHTML += m.substring(0, 6) + whiffStr + closeToGroundStr + " <img class='" + cssClass + "' src='./images/steals/" + m.replace("(Dragged)", "").replace("Ground", "").replace("Aerial", "").replace("(Whiff)", "").replace(/\s/g, "") + ".png'>";
+            movesHTML += m.substring(0, 6) + whiffStr + closeToGroundStr + " <img class='" + cssClass + "' src='./images/steals/" + m.replace("(Enemy is close to the ground)", "").replace("Ground", "").replace("Aerial", "").replace("(Whiff)", "").replace(/\s/g, "") + ".png'>";
 
         });
         movesHTML += " Aproximate Damage: " + getDamage(moves) + "</td></tr>";
@@ -405,7 +404,7 @@ var dbfz = (function () {
         let currentMove;
         let firstMove = true;
         moves.forEach(m => {
-            currentMove = m.replace(/ *\([^)]*\) */g, "").replace(/Dragged\s/g, "").replace(/Ground\s/g, "").replace(/Aerial\s/g, "");
+            currentMove = m.replace(/ *\([^)]*\) */g, "").replace(/Enemy\sis\sclose\sto\sthe\sground\s/g, "").replace(/Ground\s/g, "").replace(/Aerial\s/g, "");
             if (moveDamageProration[currentMove] != undefined) {
                 damage += proration * moveDamageProration[currentMove].damage;
                 if ((firstMove && moveDamageProration[currentMove].mustStart == true) || moveDamageProration[currentMove].mustStart == undefined) proration -= moveDamageProration[currentMove].proration;
