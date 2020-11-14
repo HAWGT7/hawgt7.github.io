@@ -79,6 +79,8 @@ var dbfz = (function () {
                 "Ground Kamehameha",
                 "Ground Homing Energy Blast"
             ],
+            canComboAfter5H: true,
+            canOnlyComboFirstIfNextMove: ["Aerial Consecutive Energy Blast"],
             teleport: true
         },
         "Aerial Kamehameha": {
@@ -137,6 +139,7 @@ var dbfz = (function () {
                 "Aerial Explosive Energy Blast",
                 "Aerial Homing Energy Blast"
             ],
+            canComboAfter2H: true,
             requiresCloseToGround: true,
             teleport: true
         }
@@ -227,6 +230,7 @@ var dbfz = (function () {
         let lastMove;
         let closeToGround;
         let requiresCloseToGround;
+        let smashOnlyCombo;
 
         for (let a = 0; a < 4; a++) {
             route = "";
@@ -238,6 +242,7 @@ var dbfz = (function () {
             lastMove = false;
             closeToGround = false;
             requiresCloseToGround = false;
+            smashOnlyCombo = false;
             //Arrays in JS are references
             usedMoves = Array.from(emptyArr);
             copiedSlots = Array.from(slots);
@@ -251,7 +256,7 @@ var dbfz = (function () {
                     usedMoves.push(copiedSlots[currentSlot]);
                     if (moveChains[copiedSlots[currentSlot]].forceCloseToGround == true) closeToGround = true;
                     if (moveChains[copiedSlots[currentSlot]].requiresCloseToGround == true) requiresCloseToGround = true;
-                    if (requiresCloseToGround && !closeToGround && moveChains[copiedSlots[currentSlot]].teleport != true) {
+                    if (requiresCloseToGround && !closeToGround && moveChains[copiedSlots[currentSlot]].teleport != true && !smashOnlyCombo) {
                         requiresCloseToGround = false;
                         route += " (Enemy is close to the ground) ";
                     }
@@ -263,6 +268,16 @@ var dbfz = (function () {
                     copiedSlots[lastMoveSlot] = "Empty";
                     if (lastMove == true) currentSlot = lastMoveSlot;
                     if (!canComboAfter(currentSlot, copiedSlots, usedMoves)) lastMove = true;
+                } else if (comboLength == 0 && moveChains[copiedSlots[currentSlot]].canComboAfter2H) {
+                    route += copiedSlots[currentSlot] + " (2H) ";
+                    currentSlot = lastMoveSlot;
+                } else if (comboLength == 0 && moveChains[copiedSlots[currentSlot]].canComboAfter5H && copiedSlots[moveChains[copiedSlots[currentSlot]].next] == moveChains[copiedSlots[currentSlot]].canOnlyComboFirstIfNextMove) {
+                    route = copiedSlots[currentSlot] + " (5H Midscreen) ";
+                    usedMoves.push(copiedSlots[currentSlot]);
+                    lastMoveSlot = currentSlot;
+                    currentSlot = moveChains[copiedSlots[currentSlot]].next;
+                    copiedSlots[lastMoveSlot] = "Empty";
+                    smashOnlyCombo = true;
                 } else {
                     if (route != "") routes.push(route);
                     comboLength = 5;
@@ -370,6 +385,7 @@ var dbfz = (function () {
         let movesHTML = "<tr><td>";
         let whiffStr = "";
         let closeToGroundStr = "";
+        let conditionStr = "";
         movesArray.forEach(m => {
             if (m.includes("(Whiff)")) {
                 whiffStr = " (Whiff) ";
@@ -381,7 +397,14 @@ var dbfz = (function () {
             } else {
                 closeToGroundStr = " ";
             }
-            movesHTML += m.substring(0, 6) + whiffStr + closeToGroundStr + " <img class='" + cssClass + "' src='./images/steals/" + m.replace("(Enemy is close to the ground)", "").replace("Ground", "").replace("Aerial", "").replace("(Whiff)", "").replace(/\s/g, "") + ".png'>";
+            if (m.includes("5H")) {
+                conditionStr = " (5H Midscreen) ";
+            } else if (m.includes("2H")) {
+                conditionStr = " (2H) ";
+            } else {
+                conditionStr = " ";
+            }
+            movesHTML += conditionStr + whiffStr + closeToGroundStr + m.substring(0, 6) + " <img class='" + cssClass + "' src='./images/steals/" + m.replace("(Enemy is close to the ground)", "").replace("Ground", "").replace("Aerial", "").replace("(Whiff)", "").replace("(2H)", "").replace("(5H Midscreen)", "").replace(/\s/g, "") + ".png'>";
 
         });
         movesHTML += " Aproximate Damage: " + getDamage(moves) + "</td></tr>";
