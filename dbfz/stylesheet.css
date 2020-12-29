@@ -22,3 +22,50 @@
   margin-top: 32px;
   margin-bottom: 32px;
 }
+
+.divBlockLeft {
+  float: left;
+}
+
+.divBlockTop {
+  float: top;
+}
+
+.divBlockRight {
+  float: right;
+  max-width: 75%;
+  max-height: 30%;
+}
+
+.characterSelect {
+  height: 400px;
+  width: 200px;
+}
+
+.characterSelect img {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.characterTier {
+  height: 28px;
+  width: 47px;
+  vertical-align: top;
+  text-align: center;
+  display: inline-block;
+  font-size: small;
+  margin: 10px;
+}
+
+.characterTier img {
+  max-height: 100%;
+  max-width: 100%;
+}
+
+.powerLevel {
+  display: block;
+}
+
+.tier {
+  min-width: 20%;
+}
