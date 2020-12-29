@@ -141,7 +141,7 @@ var dbfz = (function () {
 		html += "<table class='table'>";
 		html += "<tr><th class='tier'>TIER</th><th>CHARACTERS</th></tr>";
 		tiers.forEach(tier => {
-			html += "<tr><td>" + tier.title + " (" + tier.minPowerLevel + " - " + tier.maxPowerLevel + ")" + "</td><td>";
+			html += "<tr><td>" + tier.title + " (" + tier.maxPowerLevel + " - " + tier.minPowerLevel + ")" + "</td><td>";
 			tier.characters.forEach(character => {
 				html += "<div class='characterTier'><img src='./images/cells/" + character.title + ".png' onclick='dbfz.selectCharacter(\"" + character.title + "\")'><span class='powerLevel'>" + character.powerLevel + "</span></div>"
 			})
