@@ -86,6 +86,7 @@ var dbfz = (function () {
 		{ title: "nappa", powerLevel: 50 },
 		{ title: "piccolo", powerLevel: 50 },
 		{ title: "roshi", powerLevel: 50 },
+		{ title: "super_baby_2", powerLevel: 50 },
 		{ title: "tien", powerLevel: 50 },
 		{ title: "trunks", powerLevel: 50 },
 		{ title: "vegeta", powerLevel: 50 },

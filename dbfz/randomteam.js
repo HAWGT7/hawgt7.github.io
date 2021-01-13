@@ -35,6 +35,7 @@ var dbfz = (function () {
 		"nappa",
 		"piccolo",
 		"roshi",
+		"super_baby_2",
 		"tien",
 		"trunks",
 		"vegeta",
